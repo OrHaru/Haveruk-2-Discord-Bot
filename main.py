@@ -31,16 +31,31 @@ async def on_voice_state_update(member, before, after):
     await text_channel.set_permissions(member,
                                        manage_channels=True,
                                        manage_roles=True)
-    print(created_channels)
+
+    # Add buttons for making channel public and private
+    unlock_button = Button(style=discord.ButtonStyle.green,
+                           label="Unlock",
+                           custom_id="unlock")
+    lock_button = Button(style=discord.ButtonStyle.red,
+                         label="Lock",
+                         custom_id="lock")
+    view = View()
+    view.add_item(unlock_button)
+    view.add_item(lock_button)
+    unlock_button.callback = button_unlock
+    lock_button.callback = button_lock
+
     message = f"Welcome to your new channel, {member.mention}!"
-    await text_channel.send(message)
+    message = await text_channel.send(message, view=view)
+
     # Store the created voice channel ID and the member ID in a dictionary
     created_channels[voice_channel.id] = {
       "voice_channel": voice_channel,
       "text_channel": text_channel,
-      "member_id": member.id
+      "member_id": member.id,
+      "view": view,
+      "message": message
     }
-
   if before.channel is not None and before.channel.id in created_channels:
     # If the voice channel is empty, delete the voice and text channels
     if len(before.channel.members) == 0:
@@ -50,4 +65,53 @@ async def on_voice_state_update(member, before, after):
       await text_channel.delete()
       del created_channels[voice_channel_id]
 
+
+@bot.command()
+async def button_lock(interaction):
+  if interaction.user.voice:
+    channel = interaction.user.voice.channel
+    if interaction.user.id == created_channels[channel.id]["member_id"]:
+      overwrites = {
+        interaction.guild.default_role:
+        discord.PermissionOverwrite(connect=False),
+        interaction.user:
+        discord.PermissionOverwrite(connect=True,
+                                    manage_channels=True,
+                                    manage_permissions=True),
+        bot.user:
+        discord.PermissionOverwrite(connect=True)
+      }
+      await channel.edit(overwrites=overwrites)
+      await interaction.response.send_message("This channel is now locked!",
+                                              ephemeral=True)
+    else:
+      await interaction.response.send_message(
+        "You're not in your voice channel!", ephemeral=True)
+
+
+@bot.command()
+async def button_unlock(interaction):
+  if interaction.user.voice:
+    channel = interaction.user.voice.channel
+    if interaction.user.id == created_channels[channel.id]["member_id"]:
+
+      overwrites = {
+        interaction.guild.default_role:
+        discord.PermissionOverwrite(connect=True),
+        interaction.user:
+        discord.PermissionOverwrite(connect=True,
+                                    manage_channels=True,
+                                    manage_permissions=True),
+        bot.user:
+        discord.PermissionOverwrite(connect=True)
+      }
+      await channel.edit(overwrites=overwrites)
+      await interaction.response.send_message("This channel is now unlocked!",
+                                              ephemeral=True)
+    else:
+      await interaction.response.send_message(
+        "You're not in your voice channel!", ephemeral=True)
+
+
+keep_alive()
 bot.run(DISCORD_TOKEN)
