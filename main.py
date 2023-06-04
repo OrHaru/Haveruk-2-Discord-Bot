@@ -239,7 +239,7 @@ async def on_voice_state_update(member, before, after):
 
     # Add buttons for making channel public and private
 
-    message = f"Welcome to your new channel, {member.name}!\nStatus: 🔓Unlocked and 👁️Visible\nOwner: " + member.mention + "\nChannel Name: " + voice_channel.name
+    message = f"Welcome to your new channel, {member.name}!\nStatus: 🔓Unlocked and 👁️Visible\nOwner: " + member.mention + "\nChannel Name: " + voice_channel.name + "\nUser Limit: " + str(voice_channel.user_limit)
     message = await voice_channel.send(message, view=PersistentView())
 
     # Store the created voice channel ID and the member ID in a dictionary
@@ -721,6 +721,7 @@ class UserLimit(Modal, title='Limit your channel'):
 
   async def on_submit(self, interaction):
     new_name = str(self.answer)
+    old_name = interaction.user.voice.channel.user_limit
     voice_channel = interaction.user.voice.channel
     if new_name.isnumeric():
       if int(new_name) <= 99 or int(new_name) >= 1:
@@ -730,9 +731,16 @@ class UserLimit(Modal, title='Limit your channel'):
         granted_access[voice_channel.id],
         ephemeral=True,
         delete_after=890)
+
+        old_message = await voice_channel.fetch_message(
+        created_channels[voice_channel.id]["message"])
+        new_message_content = old_message.content.replace("User Limit: "+str(int(old_name)), "User Limit: "+str(int(new_name)))
+        await old_message.edit(content=new_message_content)
     else:
       await interaction.response.send_message(
         f'User limit has to be between 1 to 99', ephemeral=True, delete_after=890)
+
+
 
     if interaction.user.id not in created_channels[
         interaction.channel.id]["last_interaction"]:
