@@ -5,13 +5,15 @@ from keep_alive import keep_alive
 from discord.ext import commands
 from replit import db
 import time
+from ids import ids_import
+import math
+
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="$", intents=intents)  # Create a bot object
 DISCORD_TOKEN = os.getenv("TOKEN")
 print("I'm online")
-create_channel_id = 1083156473087013054
-bot_role_id = 1087731215714492509
+create_channel_id, bot_role_id, log_channel_id = ids_import()
 
 dbkeys = db.keys()
 created_channels = {}
@@ -163,6 +165,17 @@ class PersistentViewBot(commands.Bot):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
 
+async def interaction_deletion(interaction):
+  if interaction.user.id not in created_channels[
+      interaction.channel.id]["last_interaction"]:
+    created_channels[interaction.channel.id]["last_interaction"][
+      interaction.user.id] = None
+  last_interaction = created_channels[
+    interaction.channel.id]["last_interaction"][interaction.user.id]
+  if last_interaction and last_interaction.is_expired() == False:
+    await last_interaction.delete_original_response()
+  created_channels[interaction.channel.id]["last_interaction"][
+    interaction.user.id] = interaction
 
 bot = PersistentViewBot()
   
@@ -189,6 +202,10 @@ async def on_ready():
         await fetched_channel.delete()
         del created_channels[voice_channel_id]
         del db[str(voice_channel_id)]
+        
+  log_channel = await bot.fetch_channel(log_channel_id)
+  message = "I'm ready"
+  message = await log_channel.send(message)
 
 
 @bot.event
@@ -215,6 +232,9 @@ async def on_resumed():
         del created_channels[voice_channel_id]
         del db[str(voice_channel_id)]
 
+  log_channel = await bot.fetch_channel(log_channel_id)
+  message = "I've resumed"
+  message = await log_channel.send(message)
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -224,7 +244,7 @@ async def on_voice_state_update(member, before, after):
 
     # Create a voice channel and a text channel
     voice_channel = await guild.create_voice_channel(
-      name=f"{member.display_name}'s Channel", category=category)
+      name=f"{member.name}'s Channel", category=category)
 
     # Move the member to the new voice channel and set permissions
     await member.move_to(voice_channel)
@@ -297,16 +317,7 @@ async def button_lock(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -341,16 +352,7 @@ async def button_unlock(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -386,16 +388,7 @@ async def button_invisible(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -430,16 +423,7 @@ async def button_visible(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -490,16 +474,7 @@ async def button_claim(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -551,16 +526,7 @@ async def user_select_grant_access(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -611,16 +577,7 @@ async def user_select_revoke_access(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  interaction_deletion(interaction)
 
 
 class RenameChannel(Modal, title='Rename Your Channel'):
@@ -634,18 +591,22 @@ class RenameChannel(Modal, title='Rename Your Channel'):
     new_name = str(self.answer)
     old_name = interaction.user.voice.channel.name
     voice_channel = interaction.user.voice.channel
-    cooldown_duration = 3600  # 1 hour in seconds
+    cooldown_duration = 600  # 10 minutes in seconds
     now = time.time()
     if created_channels[
         voice_channel.id]['last_name_change'] != 0 and now - created_channels[
           voice_channel.id]['last_name_change'] < cooldown_duration:
       await interaction.response.send_message(
-        f"You can't change the channel name again so soon. You can do so in: "
+        f"You can't change the channel name again so soon.\nYou can do so in: "
         + str(
-          round(
+          math.floor(
             (cooldown_duration -
              (now - created_channels[voice_channel.id]['last_name_change'])) /
-            60, 2)) + " minutes\n" + granted_access[voice_channel.id],
+            60)) + " minutes and "+ str(math.floor(
+          
+            (cooldown_duration -
+             (now - created_channels[voice_channel.id]['last_name_change'])) %
+            60)) + " seconds.\n"+granted_access[voice_channel.id],
         ephemeral=True,
         delete_after=890)
     else:
@@ -663,16 +624,7 @@ class RenameChannel(Modal, title='Rename Your Channel'):
       created_channels[voice_channel.id]['last_name_change'] = now
       db[str(voice_channel.id)] = str(created_channels[voice_channel.id])
 
-    if interaction.user.id not in created_channels[
-        interaction.channel.id]["last_interaction"]:
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = None
-    last_interaction = created_channels[
-      interaction.channel.id]["last_interaction"][interaction.user.id]
-    if last_interaction and last_interaction.is_expired() == False:
-      await last_interaction.delete_original_response()
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = interaction
+    await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -687,31 +639,13 @@ async def button_rename_channel(interaction):
       await interaction.response.send_message(
         f'This is not your voice channel', ephemeral=True, delete_after=890)
 
-      if interaction.user.id not in created_channels[
-          interaction.channel.id]["last_interaction"]:
-        created_channels[interaction.channel.id]["last_interaction"][
-          interaction.user.id] = None
-      last_interaction = created_channels[
-        interaction.channel.id]["last_interaction"][interaction.user.id]
-      if last_interaction and last_interaction.is_expired() == False:
-        await last_interaction.delete_original_response()
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = interaction
+      await interaction_deletion(interaction)
 
   else:
     await interaction.response.send_message(f'You are not in a voice channel',
                                             ephemeral=True,
                                             delete_after=890)
-    if interaction.user.id not in created_channels[
-        interaction.channel.id]["last_interaction"]:
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = None
-    last_interaction = created_channels[
-      interaction.channel.id]["last_interaction"][interaction.user.id]
-    if last_interaction and last_interaction.is_expired() == False:
-      await last_interaction.delete_original_response()
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = interaction
+    await interaction_deletion(interaction)
 
 class UserLimit(Modal, title='Limit your channel'):
   answer = TextInput(label='Answer',
@@ -742,16 +676,7 @@ class UserLimit(Modal, title='Limit your channel'):
 
 
 
-    if interaction.user.id not in created_channels[
-        interaction.channel.id]["last_interaction"]:
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = None
-    last_interaction = created_channels[
-      interaction.channel.id]["last_interaction"][interaction.user.id]
-    if last_interaction and last_interaction.is_expired() == False:
-      await last_interaction.delete_original_response()
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = interaction
+    await interaction_deletion(interaction)
 
 @bot.command()
 async def button_user_limit(interaction):
@@ -765,31 +690,13 @@ async def button_user_limit(interaction):
       await interaction.response.send_message(
         f'This is not your voice channel', ephemeral=True, delete_after=890)
 
-      if interaction.user.id not in created_channels[
-          interaction.channel.id]["last_interaction"]:
-        created_channels[interaction.channel.id]["last_interaction"][
-          interaction.user.id] = None
-      last_interaction = created_channels[
-        interaction.channel.id]["last_interaction"][interaction.user.id]
-      if last_interaction and last_interaction.is_expired() == False:
-        await last_interaction.delete_original_response()
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = interaction
+      await interaction_deletion(interaction)
 
   else:
     await interaction.response.send_message(f'You are not in a voice channel',
                                             ephemeral=True,
                                             delete_after=890)
-    if interaction.user.id not in created_channels[
-        interaction.channel.id]["last_interaction"]:
-      created_channels[interaction.channel.id]["last_interaction"][
-        interaction.user.id] = None
-    last_interaction = created_channels[
-      interaction.channel.id]["last_interaction"][interaction.user.id]
-    if last_interaction and last_interaction.is_expired() == False:
-      await last_interaction.delete_original_response()
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = interaction
+    await interaction_deletion(interaction)
 
 
 @bot.command()
@@ -802,16 +709,7 @@ async def button_channel_invite(interaction):
                                           ephemeral=True,
                                           delete_after=890)
 
-  if interaction.user.id not in created_channels[
-      interaction.channel.id]["last_interaction"]:
-    created_channels[interaction.channel.id]["last_interaction"][
-      interaction.user.id] = None
-  last_interaction = created_channels[
-    interaction.channel.id]["last_interaction"][interaction.user.id]
-  if last_interaction and last_interaction.is_expired() == False:
-    await last_interaction.delete_original_response()
-  created_channels[interaction.channel.id]["last_interaction"][
-    interaction.user.id] = interaction
+  await interaction_deletion(interaction)
 
 
 keep_alive()
