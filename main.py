@@ -8,7 +8,6 @@ import time
 from ids import ids_import
 import math
 
-
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="$", intents=intents)  # Create a bot object
 DISCORD_TOKEN = os.getenv("TOKEN")
@@ -72,98 +71,116 @@ if dbkeys:
         map(int, created_channels[int(x)]['granted_access']))
 print(created_channels)
 
+
 class PersistentView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                           label="Unlock",
-                           custom_id="unlock",
-                           emoji='🔓')
-    async def unlock(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_unlock(interaction)
+  def __init__(self):
+    super().__init__(timeout=None)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                         label="Lock",
-                         custom_id="lock",
-                         emoji='🔒')
-    async def lock(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_lock(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Unlock",
+                     custom_id="unlock",
+                     emoji='🔓')
+  async def unlock(self, interaction: discord.Interaction,
+                   button: discord.ui.Button):
+    await button_unlock(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                            label="Visible",
-                            custom_id="visible",
-                            emoji='👁️')
-    async def visible(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_visible(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Lock",
+                     custom_id="lock",
+                     emoji='🔒')
+  async def lock(self, interaction: discord.Interaction,
+                 button: discord.ui.Button):
+    await button_lock(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                              label="Invisible",
-                              custom_id="invisible",
-                              emoji='🕵️')
-    async def invisible(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_invisible(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Visible",
+                     custom_id="visible",
+                     emoji='👁️')
+  async def visible(self, interaction: discord.Interaction,
+                    button: discord.ui.Button):
+    await button_visible(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                          label="Claim",
-                          custom_id="claim",
-                          emoji='👑')
-    async def claim(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_claim(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Invisible",
+                     custom_id="invisible",
+                     emoji='🕵️')
+  async def invisible(self, interaction: discord.Interaction,
+                      button: discord.ui.Button):
+    await button_invisible(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                                   label="Rename Channel",
-                                   custom_id="rename channel",
-                                   emoji='✏️')
-    async def rename(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_rename_channel(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Claim",
+                     custom_id="claim",
+                     emoji='👑')
+  async def claim(self, interaction: discord.Interaction,
+                  button: discord.ui.Button):
+    await button_claim(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                                   label="User Limit",
-                                   custom_id="user limit",
-                                   emoji='🔢')
-    async def limit(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_user_limit(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Rename Channel",
+                     custom_id="rename channel",
+                     emoji='✏️')
+  async def rename(self, interaction: discord.Interaction,
+                   button: discord.ui.Button):
+    await button_rename_channel(interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary,
-                                   label="Channel Invite",
-                                   custom_id="channel invite",
-                                   emoji='✉️')
-    async def invite(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await button_channel_invite(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="User Limit",
+                     custom_id="user limit",
+                     emoji='🔢')
+  async def limit(self, interaction: discord.Interaction,
+                  button: discord.ui.Button):
+    await button_user_limit(interaction)
 
-    @discord.ui.select(cls = UserSelect ,placeholder="Grant Private Access",
-                                          custom_id="Grant Access",
-                                          min_values=0,
-                                          max_values=1)
-    async def grant(self, interaction: discord.Interaction, select: discord.ui.UserSelect):
-        await user_select_grant_access(interaction)
+  @discord.ui.button(style=discord.ButtonStyle.primary,
+                     label="Channel Invite",
+                     custom_id="channel invite",
+                     emoji='✉️')
+  async def invite(self, interaction: discord.Interaction,
+                   button: discord.ui.Button):
+    await button_channel_invite(interaction)
 
-    @discord.ui.select(cls = UserSelect, placeholder="Revoke Private Access",
-                                           custom_id="Revoke Access",
-                                           min_values=0,
-                                           max_values=1)
-    async def revoke(self, interaction: discord.Interaction, button: discord.ui.UserSelect):
-        await user_select_revoke_access(interaction)
-      
+  @discord.ui.select(cls=UserSelect,
+                     placeholder="Grant Private Access",
+                     custom_id="Grant Access",
+                     min_values=0,
+                     max_values=1)
+  async def grant(self, interaction: discord.Interaction,
+                  select: discord.ui.UserSelect):
+    await user_select_grant_access(interaction)
+
+  @discord.ui.select(cls=UserSelect,
+                     placeholder="Revoke Private Access",
+                     custom_id="Revoke Access",
+                     min_values=0,
+                     max_values=1)
+  async def revoke(self, interaction: discord.Interaction,
+                   button: discord.ui.UserSelect):
+    await user_select_revoke_access(interaction)
+
+
 class PersistentViewBot(commands.Bot):
-    def __init__(self):
-        intents = discord.Intents.all()
-        intents.message_content = True
 
-        super().__init__(command_prefix=commands.when_mentioned_or('$'), intents=intents)
+  def __init__(self):
+    intents = discord.Intents.all()
+    intents.message_content = True
 
-    async def setup_hook(self) -> None:
-        # Register the persistent view for listening here.
-        # Note that this does not send the view to any message.
-        # In order to do this you need to first send a message with the View, which is shown below.
-        # If you have the message_id you can also pass it as a keyword argument, but for this example
-        # we don't have one.
-        self.add_view(PersistentView())
+    super().__init__(command_prefix=commands.when_mentioned_or('$'),
+                     intents=intents)
 
-    async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
+  async def setup_hook(self) -> None:
+    # Register the persistent view for listening here.
+    # Note that this does not send the view to any message.
+    # In order to do this you need to first send a message with the View, which is shown below.
+    # If you have the message_id you can also pass it as a keyword argument, but for this example
+    # we don't have one.
+    self.add_view(PersistentView())
+
+  async def on_ready(self):
+    print(f'Logged in as {self.user} (ID: {self.user.id})')
+    print('------')
+
 
 async def interaction_deletion(interaction):
   if interaction.user.id not in created_channels[
@@ -177,8 +194,10 @@ async def interaction_deletion(interaction):
   created_channels[interaction.channel.id]["last_interaction"][
     interaction.user.id] = interaction
 
+
 bot = PersistentViewBot()
-  
+
+
 @bot.event
 async def on_ready():
   global granted_access
@@ -193,8 +212,6 @@ async def on_ready():
       granted_member = await fetched_channel.guild.fetch_member(y)
       granted_access[x] = granted_access[x] + granted_member.mention
 
-  for x in list(created_channels.keys()):
-    fetched_channel = await bot.fetch_channel(x)
     if fetched_channel is not None and fetched_channel.id in created_channels:
       # If the voice channel is empty, delete the voice and text channels
       if len(fetched_channel.members) == 0:
@@ -202,7 +219,7 @@ async def on_ready():
         await fetched_channel.delete()
         del created_channels[voice_channel_id]
         del db[str(voice_channel_id)]
-        
+
   log_channel = await bot.fetch_channel(log_channel_id)
   message = "I'm ready"
   message = await log_channel.send(message)
@@ -222,8 +239,6 @@ async def on_resumed():
       granted_member = await fetched_channel.guild.fetch_member(y)
       granted_access[x] = granted_access[x] + granted_member.mention
 
-  for x in list(created_channels.keys()):
-    fetched_channel = await bot.fetch_channel(x)
     if fetched_channel is not None and fetched_channel.id in created_channels:
       # If the voice channel is empty, delete the voice and text channels
       if len(fetched_channel.members) == 0:
@@ -236,6 +251,7 @@ async def on_resumed():
   message = "I've resumed"
   message = await log_channel.send(message)
 
+
 @bot.event
 async def on_voice_state_update(member, before, after):
   if after.channel is not None and after.channel.id == create_channel_id:
@@ -243,8 +259,12 @@ async def on_voice_state_update(member, before, after):
     category = after.channel.category
 
     # Create a voice channel and a text channel
-    voice_channel = await guild.create_voice_channel(
-      name=f"{member.name}'s Channel", category=category)
+    if str(member.nick) != 'None':
+      voice_channel = await guild.create_voice_channel(
+        name=f"{member.nick}'s Channel", category=category)
+    else:
+            voice_channel = await guild.create_voice_channel(
+        name=f"{member.global_name}'s Channel", category=category)
 
     # Move the member to the new voice channel and set permissions
     await member.move_to(voice_channel)
@@ -259,7 +279,8 @@ async def on_voice_state_update(member, before, after):
 
     # Add buttons for making channel public and private
 
-    message = f"Welcome to your new channel, {member.name}!\nStatus: 🔓Unlocked and 👁️Visible\nOwner: " + member.mention + "\nChannel Name: " + voice_channel.name + "\nUser Limit: " + str(voice_channel.user_limit)
+    message = f"Status: 🔓Unlocked and 👁️Visible\nOwner: " + member.mention + "\nChannel Name: " + voice_channel.name + "\nUser Limit: " + str(
+      voice_channel.user_limit)
     message = await voice_channel.send(message, view=PersistentView())
 
     # Store the created voice channel ID and the member ID in a dictionary
@@ -577,7 +598,7 @@ async def user_select_revoke_access(interaction):
                                             ephemeral=True,
                                             delete_after=890)
 
-  interaction_deletion(interaction)
+  await interaction_deletion(interaction)
 
 
 class RenameChannel(Modal, title='Rename Your Channel'):
@@ -602,11 +623,12 @@ class RenameChannel(Modal, title='Rename Your Channel'):
           math.floor(
             (cooldown_duration -
              (now - created_channels[voice_channel.id]['last_name_change'])) /
-            60)) + " minutes and "+ str(math.floor(
-          
+            60)) + " minutes and " +
+        str(
+          math.floor(
             (cooldown_duration -
              (now - created_channels[voice_channel.id]['last_name_change'])) %
-            60)) + " seconds.\n"+granted_access[voice_channel.id],
+            60)) + " seconds.\n" + granted_access[voice_channel.id],
         ephemeral=True,
         delete_after=890)
     else:
@@ -647,6 +669,7 @@ async def button_rename_channel(interaction):
                                             delete_after=890)
     await interaction_deletion(interaction)
 
+
 class UserLimit(Modal, title='Limit your channel'):
   answer = TextInput(label='Answer',
                      style=discord.TextStyle.short,
@@ -661,22 +684,25 @@ class UserLimit(Modal, title='Limit your channel'):
       if int(new_name) <= 99 or int(new_name) >= 1:
         await voice_channel.edit(user_limit=new_name)
         await interaction.response.send_message(
-        f'You have limited the channel to '  + new_name + '\n' +
-        granted_access[voice_channel.id],
-        ephemeral=True,
-        delete_after=890)
+          f'You have limited the channel to ' + new_name + '\n' +
+          granted_access[voice_channel.id],
+          ephemeral=True,
+          delete_after=890)
 
         old_message = await voice_channel.fetch_message(
-        created_channels[voice_channel.id]["message"])
-        new_message_content = old_message.content.replace("User Limit: "+str(int(old_name)), "User Limit: "+str(int(new_name)))
+          created_channels[voice_channel.id]["message"])
+        new_message_content = old_message.content.replace(
+          "User Limit: " + str(int(old_name)),
+          "User Limit: " + str(int(new_name)))
         await old_message.edit(content=new_message_content)
     else:
       await interaction.response.send_message(
-        f'User limit has to be between 1 to 99', ephemeral=True, delete_after=890)
-
-
+        f'User limit has to be between 1 to 99',
+        ephemeral=True,
+        delete_after=890)
 
     await interaction_deletion(interaction)
+
 
 @bot.command()
 async def button_user_limit(interaction):
